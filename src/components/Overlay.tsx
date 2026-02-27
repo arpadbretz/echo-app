@@ -125,6 +125,34 @@ export function Overlay() {
             }
         );
 
+        // Force Stop (Pinning) at Acts
+        // This stops the text in the center of the screen, forcing the user to scroll through the background 3D scene 
+        // while the narrative holds perfectly still.
+        ScrollTrigger.create({
+            trigger: ".content-anchor",
+            start: "center center",
+            end: "+=150%", // Hold for 1.5 screen lengths
+            pin: true,
+        });
+        ScrollTrigger.create({
+            trigger: ".content-distortion",
+            start: "center center",
+            end: "+=200%", // Hold for 2 screen lengths
+            pin: true,
+        });
+        ScrollTrigger.create({
+            trigger: ".content-interaction",
+            start: "center center",
+            end: "+=150%",
+            pin: true,
+        });
+        ScrollTrigger.create({
+            trigger: ".content-rebirth",
+            start: "center center",
+            end: "+=100%",
+            pin: true,
+        });
+
         return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     }, []);
 
@@ -147,7 +175,7 @@ export function Overlay() {
             <div ref={containerRef} className="relative z-10 w-full pointer-events-none overflow-hidden">
                 {/* Intro */}
                 <section className="h-[250vh] w-full flex items-center justify-center section-anchor">
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center content-anchor">
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(anchorLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter I. The Anchor</p>
                         </div>
@@ -164,7 +192,7 @@ export function Overlay() {
 
                 {/* Distortion */}
                 <section className="h-[300vh] w-full flex items-center justify-start px-[8vw] section-distortion">
-                    <div>
+                    <div className="content-distortion">
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(voidLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter II. The Void</p>
                         </div>
@@ -181,7 +209,7 @@ export function Overlay() {
 
                 {/* Interaction */}
                 <section className="h-[300vh] w-full flex items-center justify-end px-[8vw] section-interaction">
-                    <div className="text-right">
+                    <div className="text-right content-interaction">
                         <div className="overflow-hidden mb-4">
                             <p ref={captureLine(interactionLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 inline-block">Awakening</p>
                         </div>
@@ -194,7 +222,7 @@ export function Overlay() {
 
                 {/* Rebirth */}
                 <section className="h-[150vh] w-full flex flex-col items-center justify-center section-rebirth">
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center content-rebirth">
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(rebirthLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 translate-y-full inline-block">Chapter III. The Evolution</p>
                         </div>

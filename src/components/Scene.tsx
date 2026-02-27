@@ -23,14 +23,7 @@ export function Scene() {
                 trigger: document.body,
                 start: "top top",
                 end: "bottom bottom",
-                scrub: 1.5, // Restored buttery smoothness
-                snap: {
-                    // Magnetic stopping points hitting the distinct text chapters
-                    snapTo: [0, 0.33, 0.66, 1],
-                    duration: { min: 0.8, max: 2.0 },
-                    delay: 0.15, // Wait until mouse wheel stops before pulling
-                    ease: "power3.inOut"
-                }
+                scrub: 1.5, // Buttery smoothness without any forced auto-scrolling
             },
         });
 
