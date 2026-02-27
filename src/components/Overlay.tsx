@@ -146,7 +146,7 @@ export function Overlay() {
 
             <div ref={containerRef} className="relative z-10 w-full pointer-events-none overflow-hidden">
                 {/* Intro */}
-                <section className="h-[120vh] w-full flex items-center justify-center section-anchor mix-blend-difference">
+                <section className="h-[250vh] w-full flex items-center justify-center section-anchor">
                     <div className="flex flex-col items-center">
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(anchorLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter I. The Anchor</p>
@@ -163,7 +163,7 @@ export function Overlay() {
                 </section>
 
                 {/* Distortion */}
-                <section className="h-[150vh] w-full flex items-center justify-start px-[8vw] section-distortion mix-blend-difference">
+                <section className="h-[300vh] w-full flex items-center justify-start px-[8vw] section-distortion">
                     <div>
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(voidLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter II. The Void</p>
@@ -180,7 +180,7 @@ export function Overlay() {
                 </section>
 
                 {/* Interaction */}
-                <section className="h-[150vh] w-full flex items-center justify-end px-[8vw] section-interaction mix-blend-difference">
+                <section className="h-[300vh] w-full flex items-center justify-end px-[8vw] section-interaction">
                     <div className="text-right">
                         <div className="overflow-hidden mb-4">
                             <p ref={captureLine(interactionLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 inline-block">Awakening</p>
@@ -193,7 +193,7 @@ export function Overlay() {
                 </section>
 
                 {/* Rebirth */}
-                <section className="h-[100vh] w-full flex flex-col items-center justify-center section-rebirth mix-blend-difference">
+                <section className="h-[150vh] w-full flex flex-col items-center justify-center section-rebirth">
                     <div className="flex flex-col items-center">
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(rebirthLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 translate-y-full inline-block">Chapter III. The Evolution</p>

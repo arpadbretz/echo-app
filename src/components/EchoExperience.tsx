@@ -10,7 +10,7 @@ export default function EchoExperience() {
             <div className="fixed inset-0 z-0 pointer-events-auto">
                 <Canvas
                     camera={{ position: [0, 0, 8], fov: 45 }}
-                    dpr={[1, 2]}
+                    dpr={1}
                     gl={{ antialias: false, alpha: false }}
                 >
                     <color attach="background" args={["#000000"]} />
