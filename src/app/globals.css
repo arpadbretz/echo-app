@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #030005;
-  /* Deep absolute void */
+  --background: #000000;
+  /* Absolute true black void */
   --foreground: #ffffff;
 }
 
 @theme inline {
   --font-sans: var(--font-inter);
   --font-serif: var(--font-cormorant);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -18,36 +22,67 @@ body {
   padding: 0;
   overflow-x: hidden;
   overscroll-behavior: none;
-  background-color: #030005;
+  background-color: #000;
+  cursor: crosshair;
+  /* Abstract immersive cursor */
 }
 
 ::-webkit-scrollbar {
   display: none;
 }
 
-/* Cinematic Film Grain */
+/* Premium Cinematic Film Grain */
 .grain {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 50;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.08;
   mix-blend-mode: overlay;
 }
 
-/* Stunning bioluminescent text glow */
+/* Intense Bioluminescent text glow to cut through the particles */
 .text-glow {
-  text-shadow: 0 0 30px rgba(255, 255, 255, 0.4),
-    0 0 80px rgba(224, 231, 34, 0.15),
-    0 0 120px rgba(75, 0, 130, 0.3);
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.4),
+    0 0 100px rgba(224, 231, 34, 0.2),
+    0 0 160px rgba(75, 0, 130, 0.4);
 }
 
-/* Endless ambient background */
+.text-gradient {
+  background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.5) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Deep Endless Space gradient for depth */
 .ambient-bg {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(35, 0, 80, 0.1) 0%, rgba(3, 0, 5, 1) 80%);
+  background: radial-gradient(circle at 50% 50%, rgba(20, 0, 40, 0.05) 0%, rgba(0, 0, 0, 1) 90%);
   z-index: -1;
   pointer-events: none;
+}
+
+/* Micro-animations */
+.fade-up-line {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-up-line.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Vignette overlay for cinematic framing */
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 49;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.85) 100%);
 }

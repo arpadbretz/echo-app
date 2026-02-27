@@ -17,6 +17,7 @@ void main() {
 
 const simulationFragmentShader = `
 uniform sampler2D positions;
+uniform sampler2D origins;
 uniform float uTime;
 uniform float uScroll;
 uniform vec3 uMouse;
@@ -104,20 +105,35 @@ float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.545
 vec3 getSphere(vec2 uv) {
   float theta = hash(uv) * 6.2831853;
   float phi = acos((hash(uv + vec2(1.0)) * 2.0) - 1.0);
-  // Layered glowing core sphere
-  float r = 3.5 + hash(uv + vec2(2.0)) * 1.5; 
-  
-  float x = r * sin(phi) * cos(theta);
-  float y = r * sin(phi) * sin(theta);
-  float z = r * cos(phi);
-  return vec3(x, y, z);
+  float r = 2.0 + hash(uv + vec2(2.0)) * 2.5; // Crystal core
+  float scale = 1.0;
+  return vec3(r * sin(phi) * cos(theta), r * sin(phi) * sin(theta), r * cos(phi)) * scale;
+}
+
+vec3 getTorusKnot(vec2 uv) {
+  float t = hash(uv) * 6.2831853 * 2.0; // Two loops
+  float p = 3.0;
+  float q = 4.0;
+  float r = cos(q * t) + 3.0;
+  float x = r * cos(p * t);
+  float y = r * sin(p * t);
+  float z = -sin(q * t);
+
+  // Thicken lines into ribbons
+  vec3 pos = vec3(x, y, z) * 1.5;
+  vec3 noiseOff = vec3(
+    (hash(uv + 3.0) - 0.5) * 1.0,
+    (hash(uv + 4.0) - 0.5) * 1.0,
+    (hash(uv + 5.0) - 0.5) * 1.0
+  );
+  return pos + noiseOff;
 }
 
 vec3 getHelix(vec2 uv) {
   float id = hash(uv);
-  float t = id * 40.0 - 20.0; // Towering double helix
-  float angle = t * 1.2; 
-  float radius = 4.0 + sin(t * 0.4) * 0.8; 
+  float t = id * 50.0 - 25.0; // Taller double helix
+  float angle = t * 1.5; 
+  float radius = 5.0 + sin(t * 0.3) * 1.5; 
   
   float strand = step(0.5, hash(uv + vec2(3.0))); 
   float offset = strand * 3.14159;
@@ -125,15 +141,13 @@ vec3 getHelix(vec2 uv) {
   float x = radius * cos(angle + offset);
   float z = radius * sin(angle + offset);
   
-  // Dense particle cloud following the strand paths
-  float nx = (hash(uv + vec2(4.0)) - 0.5) * 1.8;
-  float ny = (hash(uv + vec2(5.0)) - 0.5) * 1.8;
-  float nz = (hash(uv + vec2(6.0)) - 0.5) * 1.8;
+  float nx = (hash(uv + vec2(4.0)) - 0.5) * 1.5;
+  float ny = (hash(uv + vec2(5.0)) - 0.5) * 1.5;
+  float nz = (hash(uv + vec2(6.0)) - 0.5) * 1.5;
 
-  // Occasional connective bridges between strands
-  if (hash(uv + vec2(7.0)) > 0.96) {
-      x = x * 0.3; 
-      z = z * 0.3;
+  if (hash(uv + vec2(7.0)) > 0.97) {
+      x = x * 0.1; 
+      z = z * 0.1;
   }
 
   return vec3(x + nx, t + ny, z + nz);
@@ -141,68 +155,76 @@ vec3 getHelix(vec2 uv) {
 
 void main() {
   vec3 currentPos = texture2D(positions, vUv).xyz;
+  vec3 originPos = texture2D(origins, vUv).xyz; // Saved original pos for elasticity
   
   float scroll = clamp(uScroll, 0.0, 1.0);
-  vec3 spherePos = getSphere(vUv);
-  vec3 helixPos = getHelix(vUv);
   
-  // High-fidelity fluid turbulence
-  vec3 fluidVel = curlNoise(currentPos * 0.25 + uTime * 0.1) * 3.5;
-
-  vec3 finalTarget = spherePos;
-  float attractionForce = 0.0; 
+  vec3 shape1 = getSphere(vUv);
+  vec3 shape2 = getTorusKnot(vUv);
+  vec3 shape3 = getHelix(vUv);
   
-  if (scroll < 0.1) {
-      finalTarget = spherePos;
-      attractionForce = 0.1;
-  } else if (scroll < 0.4) {
-      float nScroll = (scroll - 0.1) / 0.3;
-      float influence = smoothstep(0.0, 1.0, nScroll);
-      finalTarget = spherePos;
-      attractionForce = mix(0.1, 0.0, influence);
-  } else if (scroll < 0.7) {
-      attractionForce = 0.0;
-  } else {
-      float nScroll = (scroll - 0.7) / 0.3;
-      float influence = smoothstep(0.0, 1.0, nScroll);
-      finalTarget = helixPos;
-      attractionForce = mix(0.0, 0.06, influence); // Snaps back into shape!
-  }
-
-  // Calculate destination velocity
-  vec3 velocity = (finalTarget - currentPos) * attractionForce;
-
-  // Very gentle gravity to center to keep infinite drift from escaping camera frustum
-  if (attractionForce == 0.0) {
-      velocity += -currentPos * 0.003;
-  }
-
-  // Fade fluid amount based on scroll state
+  vec3 fluidVel = curlNoise(currentPos * 0.2 + uTime * 0.15) * 4.5;
+  
+  vec3 finalTarget = shape1;
+  float attractionForce = 0.08;
   float fluidAmount = 0.0;
-  if (scroll >= 0.1 && scroll <= 0.4) {
-      fluidAmount = smoothstep(0.0, 1.0, (scroll - 0.1) / 0.3);
-  } else if (scroll > 0.4 && scroll < 0.7) {
-      fluidAmount = 1.0;
-  } else if (scroll >= 0.7) {
-      fluidAmount = 1.0 - smoothstep(0.0, 1.0, (scroll - 0.7) / 0.3);
+
+  // Cinematic Journey Transitions
+  if (scroll < 0.1) {
+      finalTarget = shape1;
+      attractionForce = 0.06;
+      fluidAmount = 0.05;
+  } else if (scroll < 0.35) {
+      float nScroll = (scroll - 0.1) / 0.25;
+      float inf = smoothstep(0.0, 1.0, nScroll);
+      finalTarget = mix(shape1, shape2, inf);
+      
+      // The massive supernova burst
+      float burst = sin(inf * 3.14159);
+      fluidAmount = mix(0.05, 1.5, burst);
+      attractionForce = mix(0.06, 0.02, burst);
+      
+  } else if (scroll < 0.65) {
+      finalTarget = shape2;
+      attractionForce = 0.03;
+      fluidAmount = 0.3; // Floating ribbons
+  } else if (scroll < 0.9) {
+      float nScroll = (scroll - 0.65) / 0.25;
+      float inf = smoothstep(0.0, 1.0, nScroll);
+      finalTarget = mix(shape2, shape3, inf);
+      
+      float morphFlow = sin(inf * 3.14159);
+      fluidAmount = mix(0.3, 0.8, morphFlow);
+      attractionForce = mix(0.03, 0.08, inf);
+  } else {
+      finalTarget = shape3;
+      attractionForce = 0.09;
+      fluidAmount = 0.02; // Snap tight into DNA
   }
 
-  // Apply fluid noise velocity
-  velocity += fluidVel * fluidAmount * 0.025;
-
-  // Beautiful Mouse Repulsion & Swirl
+  // Mouse interact: Swirl & Attract/Repel
   vec3 dir = currentPos - uMouse;
   float dist = length(dir);
-  if (dist < 4.0 && scroll > 0.1) {
-      float force = (4.0 - dist) / 4.0;
+  vec3 mouseForce = vec3(0.0);
+  
+  if (dist < 5.0 && scroll > 0.05 && scroll < 0.95) {
+      float force = (5.0 - dist) / 5.0;
+      // Tangent for vortex swirl
+      vec3 tangent = normalize(cross(dir, vec3(0.0, 1.0, 0.2)));
       
-      // Forcefield repel
-      velocity += normalize(dir) * force * 0.15;
-      
-      // Liquid Swirl
-      vec3 tangent = normalize(cross(dir, vec3(0.0, 1.0, 0.0)));
-      velocity += tangent * force * 0.2;
+      // Pull in then violently spin out
+      float spin = mix(0.5, 4.0, force);
+      mouseForce += tangent * spin * force;
+      mouseForce += normalize(dir) * force * 0.8;
   }
+
+  // Velocity Calculation
+  vec3 velocity = (finalTarget - currentPos) * attractionForce;
+  velocity += fluidVel * fluidAmount * 0.04;
+  velocity += mouseForce * 0.05;
+
+  // Add subtle breathing to the system
+  velocity += currentPos * sin(uTime * 2.0 + hash(vUv)*6.28) * 0.001;
 
   vec3 nextPos = currentPos + velocity;
   gl_FragColor = vec4(nextPos, 1.0);
@@ -212,69 +234,117 @@ void main() {
 const renderVertexShader = `
 uniform sampler2D positions;
 uniform float uTime;
+uniform float uScroll;
 
 varying vec3 vColor;
 varying float vDepth;
+varying float vAlpha;
 
 void main() {
   vec3 pos = texture2D(positions, position.xy).xyz;
   vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
   
-  // Point size scaling based on depth and massive canvas
-  gl_PointSize = (20.0 / -mvPosition.z);
+  // Award-winning Depth of Field hack (scale particles by depth)
+  float depth = -mvPosition.z;
+  vDepth = depth;
+  gl_PointSize = (25.0 / depth);
+  
+  // Occasional massive particles (the "Bokeh" specs)
+  float h1 = fract(sin(dot(position.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  if(h1 > 0.99) {
+      gl_PointSize *= 4.0; 
+  }
+
   gl_Position = projectionMatrix * mvPosition;
   
-  vDepth = -mvPosition.z;
+  // Dynamic color palette that evolves with scroll
+  // Scroll 0-0.3: Monochromatic Silver & Ice Blue
+  // Scroll 0.4-0.6: Deep Violet and Cyan
+  // Scroll 0.7-1.0: Warm Gold, Magenta, and White
   
-  // Complex iridescent particle coloring matching CSSglow
-  float h = fract(pos.y * 0.02 + pos.x * 0.02 + uTime * 0.05);
+  vec3 colSilver = vec3(0.9, 0.95, 1.0);
+  vec3 colIceBlue = vec3(0.0, 0.7, 1.0);
   
-  vec3 colSilver = vec3(0.88, 0.9, 0.13); // #E0E722
-  vec3 colViolet = vec3(0.5, 0.0, 0.9);   // Intense violet
-  vec3 colCyan = vec3(0.4, 0.9, 1.0);     // Sharp Bioluminescent core pop
+  vec3 colViolet = vec3(0.6, 0.0, 1.0);
+  vec3 colCyan = vec3(0.0, 1.0, 0.8);
   
-  if (h < 0.33) {
-      float mixVal = smoothstep(0.0, 0.33, h);
-      vColor = mix(colViolet, colCyan, mixVal);
-  } else if (h < 0.66) {
-      float mixVal = smoothstep(0.33, 0.66, h);
-      vColor = mix(colCyan, colSilver, mixVal);
+  vec3 colGold = vec3(1.0, 0.7, 0.1);
+  vec3 colMagenta = vec3(1.0, 0.0, 0.5);
+  vec3 colWhite = vec3(1.0);
+
+  float h = fract(pos.y * 0.01 + pos.x * 0.01 + uTime * 0.1 + h1);
+
+  vec3 col1, col2, col3;
+
+  if (uScroll < 0.3) {
+      col1 = colSilver; col2 = colIceBlue; col3 = vec3(0.2);
+  } else if (uScroll < 0.7) {
+      float t = (uScroll - 0.3) / 0.4;
+      col1 = mix(colSilver, colViolet, t);
+      col2 = mix(colIceBlue, colCyan, t);
+      col3 = mix(vec3(0.2), vec3(0.1, 0.0, 0.3), t);
   } else {
-      float mixVal = smoothstep(0.66, 1.0, h);
-      vColor = mix(colSilver, colViolet, mixVal);
+      float t = (uScroll - 0.7) / 0.3;
+      col1 = mix(colViolet, colGold, t);
+      col2 = mix(colCyan, colMagenta, t);
+      col3 = mix(vec3(0.1, 0.0, 0.3), colWhite, t * 0.5);
   }
+
+  if (h < 0.33) {
+      vColor = mix(col1, col2, h * 3.0);
+  } else if (h < 0.66) {
+      vColor = mix(col2, col3, (h - 0.33) * 3.0);
+  } else {
+      vColor = mix(col3, col1, (h - 0.66) * 3.0);
+  }
+  
+  // Blink effect on some particles
+  vAlpha = 0.5 + 0.5 * sin(uTime * 3.0 + h1 * 100.0);
 }
 `;
 
 const renderFragmentShader = `
 varying vec3 vColor;
 varying float vDepth;
+varying float vAlpha;
 
 void main() {
   vec2 coords = gl_PointCoord - vec2(0.5);
   float dist = length(coords);
   if (dist > 0.5) discard;
   
-  // Smooth glowing fade out algorithms
+  // Custom painted bokeh dot (soft edge, bright core)
   float alpha = smoothstep(0.5, 0.1, dist);
   float core = smoothstep(0.15, 0.0, dist);
   
-  vec3 coreColor = vec3(1.0); // pure blinding white core
+  vec3 coreColor = vec3(1.0); 
   vec3 finalColor = mix(vColor, coreColor, core * 0.9);
   
-  // Depth fade (particles vanishing far into the void)
-  float depthFading = smoothstep(50.0, 10.0, vDepth);
+  // DoF fade out
+  float depthFading = smoothstep(60.0, 15.0, vDepth);
   
-  gl_FragColor = vec4(finalColor, alpha * 0.8 * depthFading);
+  // Additive intense blending needs high base alpha multiplier
+  gl_FragColor = vec4(finalColor, alpha * vAlpha * depthFading * 0.8);
 }
 `;
 
 export function Particles({ scrollTracker }: { scrollTracker: React.MutableRefObject<{ progress: number }> }) {
-  // 768x768 texture === 589,824 active GPU particles! (Extremely dense)
-  const size = 768;
+  // 800x800 texture === 640000 particles! Mind-bending scale.
+  const size = 800;
 
   const [scene] = useState(() => new THREE.Scene());
   const [camera] = useState(() => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1));
+  const [originsTexture] = useState(() => {
+    const data = new Float32Array(size * size * 4);
+    for (let i = 0; i < size * size; i++) {
+      // we could store original deterministic seed here if we want perfectly elastic resets
+      data[i * 4] = 0; data[i * 4 + 1] = 0; data[i * 4 + 2] = 0; data[i * 4 + 3] = 1;
+    }
+    const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat, THREE.FloatType);
+    tex.needsUpdate = true;
+    return tex;
+  });
+
   const positions = useMemo(() => new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0]), []);
   const uvs = useMemo(() => new Float32Array([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1]), []);
 
@@ -283,41 +353,54 @@ export function Particles({ scrollTracker }: { scrollTracker: React.MutableRefOb
 
   const targetRef = useRef(renderTargetA);
 
-  const simMaterial = useMemo(() => new THREE.ShaderMaterial({ vertexShader: simulationVertexShader, fragmentShader: simulationFragmentShader, uniforms: { positions: { value: null }, uTime: { value: 0 }, uScroll: { value: 0 }, uMouse: { value: new THREE.Vector3() } } }), []);
-  const renderMaterial = useMemo(() => new THREE.ShaderMaterial({ vertexShader: renderVertexShader, fragmentShader: renderFragmentShader, uniforms: { positions: { value: null }, uTime: { value: 0 } }, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }), []);
+  const simMaterial = useMemo(() => new THREE.ShaderMaterial({ vertexShader: simulationVertexShader, fragmentShader: simulationFragmentShader, uniforms: { positions: { value: null }, origins: { value: originsTexture }, uTime: { value: 0 }, uScroll: { value: 0 }, uMouse: { value: new THREE.Vector3(999, 999, 999) } } }), [originsTexture]);
+  const renderMaterial = useMemo(() => new THREE.ShaderMaterial({ vertexShader: renderVertexShader, fragmentShader: renderFragmentShader, uniforms: { positions: { value: null }, uTime: { value: 0 }, uScroll: { value: 0 } }, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }), []);
 
   const particlesGeo = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
     const posArray = new Float32Array(size * size * 3);
-    // Initializing UV mappings
+    const randomArray = new Float32Array(size * size);
+
     for (let i = 0; i < size; i++) {
       for (let j = 0; j < size; j++) {
         const index = (i * size + j) * 3;
         posArray[index] = (i / size);
         posArray[index + 1] = (j / size);
         posArray[index + 2] = 0;
+        randomArray[i * size + j] = Math.random();
       }
     }
     geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    geometry.setAttribute('aRandom', new THREE.BufferAttribute(randomArray, 1));
     return geometry;
   }, [size]);
 
-  const pointer = useRef(new THREE.Vector3());
+  const pointer = useRef(new THREE.Vector3(999, 999, 999));
   const vec = useRef(new THREE.Vector3());
 
+  // Mouse entering/leaving tracking
+  useEffect(() => {
+    const resetMouse = () => pointer.current.set(999, 999, 999);
+    window.addEventListener('mouseout', resetMouse);
+    return () => window.removeEventListener('mouseout', resetMouse);
+  }, []);
+
   useFrame((state) => {
-    // Accurately map 2D mouse pointer into 3D world space depth for collision detection.
-    vec.current.set(state.pointer.x, state.pointer.y, 0.5);
-    vec.current.unproject(state.camera);
-    vec.current.sub(state.camera.position).normalize();
-    const distance = -state.camera.position.z / vec.current.z;
-    pointer.current.copy(state.camera.position).add(vec.current.multiplyScalar(distance));
+    if (state.pointer.x === 0 && state.pointer.y === 0) {
+      // initial hidden mouse
+    } else {
+      vec.current.set(state.pointer.x, state.pointer.y, 0.5);
+      vec.current.unproject(state.camera);
+      vec.current.sub(state.camera.position).normalize();
+      const distance = -state.camera.position.z / vec.current.z;
+      pointer.current.copy(state.camera.position).add(vec.current.multiplyScalar(distance));
+    }
 
     const time = state.clock.elapsedTime;
     simMaterial.uniforms.uTime.value = time;
     simMaterial.uniforms.uScroll.value = scrollTracker.current.progress;
 
-    simMaterial.uniforms.uMouse.value.lerp(pointer.current, 0.1);
+    simMaterial.uniforms.uMouse.value.lerp(pointer.current, 0.15); // Snappier mouse tracking
 
     const targetA = targetRef.current;
     const targetB = targetA === renderTargetA ? renderTargetB : renderTargetA;
@@ -331,6 +414,7 @@ export function Particles({ scrollTracker }: { scrollTracker: React.MutableRefOb
     targetRef.current = targetB;
     renderMaterial.uniforms.positions.value = targetB.texture;
     renderMaterial.uniforms.uTime.value = time;
+    renderMaterial.uniforms.uScroll.value = scrollTracker.current.progress;
   });
 
   return (
