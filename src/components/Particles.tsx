@@ -329,8 +329,8 @@ void main() {
 `;
 
 export function Particles({ scrollTracker }: { scrollTracker: React.MutableRefObject<{ progress: number }> }) {
-  // 512x512 texture === 262,144 particles! (Optimized for 60fps with post-processing)
-  const size = 512;
+  // 350x350 texture === 122,500 particles! (Optimized for perfectly smooth 60fps)
+  const size = 350;
 
   const [scene] = useState(() => new THREE.Scene());
   const [camera] = useState(() => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1));

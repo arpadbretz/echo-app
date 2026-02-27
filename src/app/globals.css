@@ -42,19 +42,17 @@ body {
   mix-blend-mode: overlay;
 }
 
-/* Intense Bioluminescent text glow to cut through the particles */
+/* Refined cinematic text glow that doesn't wash out the text */
 .text-glow {
-  text-shadow: 0 0 40px rgba(255, 255, 255, 0.4),
-    0 0 100px rgba(224, 231, 34, 0.2),
-    0 0 160px rgba(75, 0, 130, 0.4);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.4),
+    0 0 40px rgba(224, 231, 34, 0.1),
+    0 0 60px rgba(75, 0, 130, 0.2);
 }
 
-.text-gradient {
-  background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.5) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* 
+Removed .text-gradient because combining -webkit-text-fill-color: transparent 
+with text-shadow causes the text to become a blurry smudge. 
+*/
 
 /* Deep Endless Space gradient for depth */
 .ambient-bg {

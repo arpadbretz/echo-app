@@ -18,12 +18,12 @@ export function Scene() {
 
         gsap.to(scrollTracker.current, {
             progress: 1,
-            ease: "power2.inOut",
+            ease: "none",
             scrollTrigger: {
                 trigger: document.body,
                 start: "top top",
                 end: "bottom bottom",
-                scrub: 1.5,
+                scrub: 0.2, // Tighter to the scrollbar, less artificial "lag" feel
             },
         });
 
@@ -67,21 +67,14 @@ export function Scene() {
                 <Particles scrollTracker={scrollTracker} />
             </group>
 
-            {/* Extreme Cinematic Post Processing */}
-            <EffectComposer disableNormalPass multisampling={4}>
+            {/* Performance Optimized Post Processing - CSS handles Grain & Vignette */}
+            <EffectComposer disableNormalPass multisampling={0}>
                 <Bloom
                     luminanceThreshold={0.2}
                     luminanceSmoothing={0.9}
                     intensity={1.5} // Stunning bioluminescence
                     mipmapBlur={true}
                 />
-                <ChromaticAberration
-                    blendFunction={BlendFunction.NORMAL}
-                    offset={new THREE.Vector2(0.002, 0.002)}
-                />
-                {/* Subtle high-freq noise mapped over the bloom creates a grainy textured glow */}
-                <Noise opacity={0.035} blendFunction={BlendFunction.OVERLAY} />
-                <Vignette eskil={false} offset={0.1} darkness={1.1} />
             </EffectComposer>
         </>
     );
