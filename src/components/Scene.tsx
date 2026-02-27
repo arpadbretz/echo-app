@@ -23,7 +23,7 @@ export function Scene() {
                 trigger: document.body,
                 start: "top top",
                 end: "bottom bottom",
-                scrub: 0.2, // Tighter to the scrollbar, less artificial "lag" feel
+                scrub: 1.0, // Buttery smooth lag-free interaction (standard for smooth scroll)
             },
         });
 
@@ -41,18 +41,21 @@ export function Scene() {
             const p = scrollTracker.current.progress;
 
             // Extreme cinematic push in and pull out
-            // Starts close to the sphere, pulls out to view massive ribbons, pushes back into DNA Helix
             let zPos = 12;
             let yPos = 0;
 
             if (p < 0.3) {
-                zPos = THREE.MathUtils.lerp(8, 25, p / 0.3); // Pull back on supernova
+                // Fly backwards OUT of the massive deep space nebula
+                zPos = THREE.MathUtils.lerp(1, 35, p / 0.3);
+                yPos = THREE.MathUtils.lerp(0, 5, p / 0.3);
             } else if (p < 0.7) {
-                zPos = 25; // Hold wide for massive floating ribbons
-                yPos = THREE.MathUtils.lerp(0, 3, (p - 0.3) / 0.4); // Pan up slightly
+                // Drift horizontally past floating ribbons
+                zPos = THREE.MathUtils.lerp(35, 25, (p - 0.3) / 0.4);
+                yPos = THREE.MathUtils.lerp(5, 3, (p - 0.3) / 0.4);
             } else {
-                zPos = THREE.MathUtils.lerp(25, 14, (p - 0.7) / 0.3); // Push in hard to Helix
-                yPos = THREE.MathUtils.lerp(3, -5, (p - 0.7) / 0.3); // Tilt down massive helix
+                // Aggressively push forward into the final DNA Helix
+                zPos = THREE.MathUtils.lerp(25, 14, (p - 0.7) / 0.3);
+                yPos = THREE.MathUtils.lerp(3, -5, (p - 0.7) / 0.3);
             }
 
             state.camera.position.z = zPos;

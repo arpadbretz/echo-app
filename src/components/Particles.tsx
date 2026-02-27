@@ -102,12 +102,27 @@ vec3 curlNoise( vec3 p ){
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 
-vec3 getSphere(vec2 uv) {
+vec3 getNebula(vec2 uv) {
+  // A sprawling, volumetric cosmos.
   float theta = hash(uv) * 6.2831853;
-  float phi = acos((hash(uv + vec2(1.0)) * 2.0) - 1.0);
-  float r = 2.0 + hash(uv + vec2(2.0)) * 2.5; // Crystal core
-  float scale = 1.0;
-  return vec3(r * sin(phi) * cos(theta), r * sin(phi) * sin(theta), r * cos(phi)) * scale;
+  
+  // Stretch way into the background and directly into the camera lens
+  float z = (hash(uv + vec2(1.0)) - 0.5) * 60.0; 
+  
+  // Radius expands drastically depending on depth and random factors
+  float r = (hash(uv + vec2(2.0)) + 0.1) * 15.0; 
+  
+  if (hash(uv + vec2(3.0)) > 0.8) {
+      r *= 4.0; // Distant floating space dust
+  } else {
+      r *= pow(hash(uv + vec2(4.0)), 2.0); // Dense, clustered galactic core
+  }
+  
+  // Gentle spiral twist
+  float x = r * cos(theta + z * 0.05);
+  float y = r * sin(theta + z * 0.05);
+  
+  return vec3(x, y, z);
 }
 
 vec3 getTorusKnot(vec2 uv) {
@@ -159,7 +174,7 @@ void main() {
   
   float scroll = clamp(uScroll, 0.0, 1.0);
   
-  vec3 shape1 = getSphere(vUv);
+  vec3 shape1 = getNebula(vUv);
   vec3 shape2 = getTorusKnot(vUv);
   vec3 shape3 = getHelix(vUv);
   
@@ -244,15 +259,18 @@ void main() {
   vec3 pos = texture2D(positions, position.xy).xyz;
   vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
   
-  // Award-winning Depth of Field hack (scale particles by depth)
+  // Extreme cinematic Depth of Field hack
   float depth = -mvPosition.z;
   vDepth = depth;
-  gl_PointSize = (25.0 / depth);
+  
+  // Prevent division by tiny numbers when passing directly through the camera
+  float safeDepth = max(depth, 1.0);
+  gl_PointSize = (60.0 / safeDepth); // Much larger scale for upfront particles
   
   // Occasional massive particles (the "Bokeh" specs)
   float h1 = fract(sin(dot(position.xy, vec2(12.9898, 78.233))) * 43758.5453);
-  if(h1 > 0.99) {
-      gl_PointSize *= 4.0; 
+  if(h1 > 0.98) {
+      gl_PointSize *= mix(3.0, 9.0, fract(h1 * 123.456)); // Huge variety
   }
 
   gl_Position = projectionMatrix * mvPosition;
