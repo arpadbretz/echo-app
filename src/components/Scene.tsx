@@ -16,12 +16,12 @@ export function Scene() {
 
         gsap.to(scrollTracker.current, {
             progress: 1,
-            ease: "none",
+            ease: "power1.inOut",
             scrollTrigger: {
                 trigger: document.body,
                 start: "top top",
                 end: "bottom bottom",
-                scrub: 1,
+                scrub: 1.5,
             },
         });
 
@@ -32,8 +32,20 @@ export function Scene() {
 
     useFrame((state, delta) => {
         if (groupRef.current) {
-            groupRef.current.rotation.y += delta * 0.05;
-            groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.2) * 0.1;
+            // Cinematic continuous rotation
+            groupRef.current.rotation.y += delta * 0.15;
+            groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.2;
+
+            const p = scrollTracker.current.progress;
+
+            // Cinematic camera zoom and pan mapping to the scroll position
+            // DNA sequence is massive, so we slowly zoom out 
+            state.camera.position.z = THREE.MathUtils.lerp(12, 28, p);
+
+            // Pan camera up to view the towering double helix
+            state.camera.position.y = THREE.MathUtils.lerp(0, p > 0.8 ? -4 : 0, p);
+
+            state.camera.lookAt(0, 0, 0);
         }
     });
 
