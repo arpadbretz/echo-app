@@ -13,8 +13,9 @@ export function Overlay() {
 
     // Line refs for stagger animations
     const anchorLines = useRef<(HTMLSpanElement | null)[]>([]);
+    const webLines = useRef<(HTMLSpanElement | null)[]>([]);
+    const pulsarLines = useRef<(HTMLSpanElement | null)[]>([]);
     const voidLines = useRef<(HTMLSpanElement | null)[]>([]);
-    const interactionLines = useRef<(HTMLSpanElement | null)[]>([]);
     const rebirthLines = useRef<(HTMLSpanElement | null)[]>([]);
 
     const captureLine = (refsArray: React.MutableRefObject<(HTMLSpanElement | null)[]>, index: number) =>
@@ -78,7 +79,41 @@ export function Overlay() {
             },
         });
 
-        // Chapter 2: The Void (Distortion)
+        // Chapter 2: The Network
+        gsap.fromTo(webLines.current,
+            { opacity: 0, x: -100 },
+            {
+                opacity: 1,
+                x: 0,
+                stagger: 0.15,
+                scrollTrigger: { trigger: ".section-web", start: "top bottom", end: "top 30%", scrub: 1 }
+            }
+        );
+        gsap.to(webLines.current, {
+            opacity: 0,
+            y: -100,
+            stagger: 0.05,
+            scrollTrigger: { trigger: ".section-web", start: "bottom 70%", end: "bottom top", scrub: 1 }
+        });
+
+        // Chapter 3: The Pulse
+        gsap.fromTo(pulsarLines.current,
+            { opacity: 0, scale: 0.8 },
+            {
+                opacity: 1,
+                scale: 1,
+                stagger: 0.1,
+                scrollTrigger: { trigger: ".section-pulsar", start: "top 60%", end: "top 30%", scrub: 1 }
+            }
+        );
+        gsap.to(pulsarLines.current, {
+            opacity: 0,
+            y: -50,
+            stagger: 0.05,
+            scrollTrigger: { trigger: ".section-pulsar", start: "bottom 70%", end: "bottom top", scrub: 1 }
+        });
+
+        // Chapter 4: The Void
         gsap.fromTo(voidLines.current,
             { opacity: 0, y: 100 },
             {
@@ -95,24 +130,7 @@ export function Overlay() {
             scrollTrigger: { trigger: ".section-distortion", start: "bottom 70%", end: "bottom top", scrub: 1 }
         });
 
-        // Interaction Prompt
-        gsap.fromTo(interactionLines.current,
-            { opacity: 0, scale: 0.8 },
-            {
-                opacity: 1,
-                scale: 1,
-                stagger: 0.1,
-                scrollTrigger: { trigger: ".section-interaction", start: "top 60%", end: "top 30%", scrub: 1 }
-            }
-        );
-        gsap.to(interactionLines.current, {
-            opacity: 0,
-            y: -50,
-            stagger: 0.05,
-            scrollTrigger: { trigger: ".section-interaction", start: "bottom 70%", end: "bottom top", scrub: 1 }
-        });
-
-        // Chapter 3: Rebirth
+        // Chapter 5: Rebirth
         gsap.fromTo(rebirthLines.current,
             { opacity: 0, scale: 1.1, y: 100 },
             {
@@ -162,43 +180,64 @@ export function Overlay() {
                     </div>
                 </section>
 
-                {/* Distortion */}
-                <section className="h-[300vh] w-full relative section-distortion">
+                {/* The Network */}
+                <section className="h-[250vh] w-full relative section-web">
                     <div className="sticky top-0 h-screen w-full flex flex-col items-start justify-center px-[8vw]">
                         <div className="overflow-hidden mb-8">
-                            <p ref={captureLine(voidLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter II. The Void</p>
+                            <p ref={captureLine(webLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter II. The Network</p>
                         </div>
-                        <h2 className="font-serif text-[clamp(2rem,6vw,9rem)] italic font-light text-glow text-ethereal leading-[0.9]">
+                        <h2 className="font-serif text-[clamp(2.5rem,6vw,9rem)] italic font-light text-glow text-ethereal leading-[0.9]">
                             <div className="overflow-hidden p-2">
-                                <span ref={captureLine(voidLines, 1)} className="inline-block opacity-0 translate-y-[120%]">Time only</span>
+                                <span ref={captureLine(webLines, 1)} className="inline-block opacity-0 translate-x-full">A million paths</span>
                             </div>
                             <div className="overflow-hidden p-2">
-                                <span ref={captureLine(voidLines, 2)} className="inline-block not-italic opacity-60 ml-[10vw] opacity-0 translate-y-[120%]">distorts the form.</span>
+                                <span ref={captureLine(webLines, 2)} className="inline-block not-italic opacity-80 opacity-0 translate-x-full">unfolding within.</span>
                             </div>
                         </h2>
                     </div>
                 </section>
 
-                {/* Interaction */}
-                <section className="h-[300vh] w-full relative section-interaction">
+                {/* The Pulse */}
+                <section className="h-[250vh] w-full relative section-pulsar">
                     <div className="sticky top-0 h-screen w-full flex flex-col items-end justify-center px-[8vw] text-right">
                         <div className="overflow-hidden mb-4">
-                            <p ref={captureLine(interactionLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 inline-block">Awakening</p>
+                            <p ref={captureLine(pulsarLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 inline-block">Chapter III. The Pulse</p>
                         </div>
-                        <p className="font-serif text-[clamp(1.2rem,3vw,3.5rem)] italic opacity-90 font-light text-glow text-ethereal">
-                            <span ref={captureLine(interactionLines, 1)} className="inline-block opacity-0">Reach out.</span><br />
-                            <span ref={captureLine(interactionLines, 2)} className="inline-block opacity-0">Scatter the dust.</span>
+                        <p className="font-serif text-[clamp(2rem,5vw,7rem)] opacity-90 font-light text-glow text-ethereal leading-[0.9]">
+                            <div className="overflow-hidden p-2">
+                                <span ref={captureLine(pulsarLines, 1)} className="inline-block opacity-0 scale-150">Energy</span>
+                            </div>
+                            <div className="overflow-hidden p-2">
+                                <span ref={captureLine(pulsarLines, 2)} className="inline-block italic opacity-0 scale-150">demands release.</span>
+                            </div>
                         </p>
                     </div>
                 </section>
 
-                {/* Rebirth */}
+                {/* The Void */}
+                <section className="h-[250vh] w-full relative section-distortion">
+                    <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center text-center">
+                        <div className="overflow-hidden mb-8">
+                            <p ref={captureLine(voidLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter IV. The Void</p>
+                        </div>
+                        <h2 className="font-serif text-[clamp(3.5rem,8vw,12rem)] font-light text-glow text-ethereal leading-[0.9]">
+                            <div className="overflow-hidden p-2">
+                                <span ref={captureLine(voidLines, 1)} className="inline-block opacity-0 translate-y-full">Everything returns</span>
+                            </div>
+                            <div className="overflow-hidden p-2">
+                                <span ref={captureLine(voidLines, 2)} className="inline-block italic opacity-40 opacity-0 translate-y-full">to the deep.</span>
+                            </div>
+                        </h2>
+                    </div>
+                </section>
+
+                {/* Evolution */}
                 <section className="h-[150vh] w-full relative section-rebirth">
                     <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center">
                         <div className="overflow-hidden mb-8">
-                            <p ref={captureLine(rebirthLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 translate-y-full inline-block">Chapter III. The Evolution</p>
+                            <p ref={captureLine(rebirthLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 translate-y-full inline-block">Chapter V. The Evolution</p>
                         </div>
-                        <h1 className="font-serif text-[clamp(3.5rem,10vw,16rem)] font-light tracking-widest text-glow text-ethereal">
+                        <h1 className="font-serif text-[clamp(4rem,12vw,18rem)] font-light tracking-widest text-glow text-ethereal">
                             <div className="overflow-hidden p-4">
                                 <span ref={captureLine(rebirthLines, 1)} className="inline-block opacity-0 translate-y-full">A new <span className="italic">echo</span>.</span>
                             </div>

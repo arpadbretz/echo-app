@@ -44,18 +44,26 @@ export function Scene() {
             let zPos = 12;
             let yPos = 0;
 
-            if (p < 0.3) {
+            if (p < 0.2) {
                 // ACT 1: Fly backwards OUT of the massive deep space nebula
-                zPos = THREE.MathUtils.lerp(1, 45, p / 0.3);
-                yPos = THREE.MathUtils.lerp(0, 5, p / 0.3);
-            } else if (p < 0.7) {
-                // ACT 2: Rise up and view the immense Black Hole / Accretion Disk from above
-                zPos = THREE.MathUtils.lerp(45, 20, (p - 0.3) / 0.4);
-                yPos = THREE.MathUtils.lerp(5, 25, (p - 0.3) / 0.4);
+                zPos = THREE.MathUtils.lerp(1, 45, p / 0.2);
+                yPos = THREE.MathUtils.lerp(0, 5, p / 0.2);
+            } else if (p < 0.4) {
+                // ACT 2: Dive fast and incredibly deep through the Cosmic Web
+                zPos = THREE.MathUtils.lerp(45, 90, (p - 0.2) / 0.2);
+                yPos = THREE.MathUtils.lerp(5, 10, (p - 0.2) / 0.2);
+            } else if (p < 0.6) {
+                // ACT 3: Pull back horizontally to orbit the towering Pulsar Jets
+                zPos = THREE.MathUtils.lerp(90, 35, (p - 0.4) / 0.2);
+                yPos = THREE.MathUtils.lerp(10, 20, (p - 0.4) / 0.2);
+            } else if (p < 0.8) {
+                // ACT 4: Rise up and view the immense Black Hole / Accretion Disk from above
+                zPos = THREE.MathUtils.lerp(35, 15, (p - 0.6) / 0.2);
+                yPos = THREE.MathUtils.lerp(20, 25, (p - 0.6) / 0.2);
             } else {
-                // ACT 3: Divebomb toward the violent, concentrated Singularity
-                zPos = THREE.MathUtils.lerp(20, 5, (p - 0.7) / 0.3); // Stopt at 5 so we don't blind the camera 
-                yPos = THREE.MathUtils.lerp(25, -5, (p - 0.7) / 0.3);
+                // ACT 5: Divebomb toward the violent, concentrated Singularity
+                zPos = THREE.MathUtils.lerp(15, 6, (p - 0.8) / 0.2);
+                yPos = THREE.MathUtils.lerp(25, -5, (p - 0.8) / 0.2);
             }
 
             state.camera.position.z = zPos;

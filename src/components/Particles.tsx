@@ -125,6 +125,56 @@ vec3 getNebula(vec2 uv) {
   return vec3(x, y, z);
 }
 
+vec3 getCosmicWeb(vec2 uv) {
+  // Act 2: Massive branching filaments (Dark matter grid / web)
+  float id = hash(uv);
+  
+  // Create a massive cavernous tunnel effect
+  float theta = hash(uv + 1.0) * 6.2831853;
+  float radius = 10.0 + (hash(uv + 2.0) * 20.0); // Very wide
+  
+  // Add heavy turbulence mapping to create the "webbing" filaments
+  float turb = sin(theta * 5.0) * cos(id * 10.0);
+  radius += turb * 8.0;
+  
+  float x = radius * cos(theta);
+  float y = radius * sin(theta);
+  
+  // Stretch incredibly deep into the Z axis
+  float z = (hash(uv + 3.0) - 0.5) * 100.0;
+  
+  return vec3(x, y, z);
+}
+
+vec3 getPulsar(vec2 uv) {
+  // Act 3: A violently spinning neutron star with massive polar jets
+  float id = hash(uv);
+  float isJet = step(0.85, hash(uv + 1.0)); // 15% of particles belong to the jets
+  
+  if (isJet > 0.5) {
+      // The massive energy beams shooting out of the poles
+      float angle = hash(uv + 2.0) * 6.2831853;
+      float r = hash(uv + 3.0) * 1.5; // Narrow beam
+      
+      float x = r * cos(angle);
+      float z = r * sin(angle);
+      
+      // Shoot incredibly far up and down the Y axis
+      float yDir = sign(hash(uv + 4.0) - 0.5);
+      float y = yDir * (hash(uv + 5.0) * 40.0 + 5.0); 
+      
+      return vec3(x, y, z);
+  } else {
+      // The ultra-dense, rapidly spinning core
+      float theta = hash(uv + 6.0) * 6.2831853;
+      float phi = acos((hash(uv + 7.0) * 2.0) - 1.0);
+      float r = 2.0 + (hash(uv + 8.0) * 0.2); // Very tight sphere
+      
+      // Squish it slightly because of high rotation speed
+      return vec3(r * 1.2 * sin(phi) * cos(theta), r * 0.8 * cos(phi), r * 1.2 * sin(phi) * sin(theta));
+  }
+}
+
 vec3 getBlackHole(vec2 uv) {
   // A monumental event horizon / accretion disk
   float t = hash(uv) * 6.2831853; // Angle
@@ -170,9 +220,11 @@ void main() {
   
   float scroll = clamp(uScroll, 0.0, 1.0);
   
-  vec3 shape1 = getNebula(vUv);
-  vec3 shape2 = getBlackHole(vUv);
-  vec3 shape3 = getSingularity(vUv);
+  vec3 shape1 = getNebula(vUv);      // 0.0 - 0.2
+  vec3 shape2 = getCosmicWeb(vUv);   // 0.2 - 0.4
+  vec3 shape3 = getPulsar(vUv);      // 0.4 - 0.6
+  vec3 shape4 = getBlackHole(vUv);   // 0.6 - 0.8
+  vec3 shape5 = getSingularity(vUv); // 0.8 - 1.0
   
   vec3 fluidVel = curlNoise(currentPos * 0.2 + uTime * 0.15) * 4.5;
   
@@ -180,37 +232,64 @@ void main() {
   float attractionForce = 0.08;
   float fluidAmount = 0.0;
 
-  // Cinematic Journey Transitions
+  // 5-Act Cinematic Journey Transitions
   if (scroll < 0.1) {
       finalTarget = shape1;
       attractionForce = 0.06;
       fluidAmount = 0.05;
-  } else if (scroll < 0.35) {
-      float nScroll = (scroll - 0.1) / 0.25;
-      float inf = smoothstep(0.0, 1.0, nScroll);
+  } else if (scroll < 0.25) {
+      // Transition 1 to 2
+      float inf = smoothstep(0.1, 0.25, scroll);
       finalTarget = mix(shape1, shape2, inf);
-      
-      // The massive supernova burst
       float burst = sin(inf * 3.14159);
-      fluidAmount = mix(0.05, 1.5, burst);
+      fluidAmount = mix(0.05, 1.0, burst);
       attractionForce = mix(0.06, 0.02, burst);
-      
-  } else if (scroll < 0.65) {
+  } else if (scroll < 0.35) {
+      // Shape 2 solid
       finalTarget = shape2;
-      attractionForce = 0.03;
-      fluidAmount = 0.3; // Floating ribbons
-  } else if (scroll < 0.9) {
-      float nScroll = (scroll - 0.65) / 0.25;
-      float inf = smoothstep(0.0, 1.0, nScroll);
+      attractionForce = 0.04;
+      fluidAmount = 0.1; 
+  } else if (scroll < 0.5) {
+      // Transition 2 to 3
+      float inf = smoothstep(0.35, 0.5, scroll);
       finalTarget = mix(shape2, shape3, inf);
-      
+      float burst = sin(inf * 3.14159);
+      fluidAmount = mix(0.1, 2.0, burst); // violent shift
+      attractionForce = mix(0.04, 0.05, inf);
+  } else if (scroll < 0.6) {
+      // Shape 3 solid
+      finalTarget = shape3;
+      attractionForce = 0.15; // Pulled tight
+      fluidAmount = 0.2;
+      // Add intense spin for the pulsar
+      vec3 tangent = normalize(cross(currentPos, vec3(0.0, 1.0, 0.0)));
+      fluidVel += tangent * 15.0; 
+  } else if (scroll < 0.75) {
+      // Transition 3 to 4
+      float inf = smoothstep(0.6, 0.75, scroll);
+      finalTarget = mix(shape3, shape4, inf);
+      fluidAmount = mix(0.2, 0.3, inf);
+      attractionForce = mix(0.15, 0.04, inf);
+  } else if (scroll < 0.85) {
+      // Shape 4 solid
+      finalTarget = shape4;
+      attractionForce = 0.04;
+      fluidAmount = 0.3;
+      // Ambient spin for accretion disk
+      vec3 tangent = normalize(cross(currentPos, vec3(0.0, 1.0, 0.0)));
+      fluidVel += tangent * 5.0; 
+  } else if (scroll < 0.95) {
+      // Transition 4 to 5
+      float inf = smoothstep(0.85, 0.95, scroll);
+      finalTarget = mix(shape4, shape5, inf);
       float morphFlow = sin(inf * 3.14159);
       fluidAmount = mix(0.3, 0.8, morphFlow);
-      attractionForce = mix(0.03, 0.08, inf);
+      attractionForce = mix(0.04, 0.09, inf);
   } else {
-      finalTarget = shape3;
-      attractionForce = 0.09;
-      fluidAmount = 0.02; // Snap tight into DNA
+      // Shape 5 solid
+      finalTarget = shape5;
+      attractionForce = 0.12; 
+      fluidAmount = 0.05; 
   }
 
   // Cinematic Mouse Interaction: Elegant Gravity Lensing Wake
@@ -274,38 +353,57 @@ void main() {
   gl_Position = projectionMatrix * mvPosition;
   
   // Dynamic color palette that evolves with scroll
-  // ACT 1: Deep Ethereal Nebula (Teals, deep blues, soft starlight)
-  vec3 colNebula1 = vec3(0.0, 0.4, 0.8);
-  vec3 colNebula2 = vec3(0.1, 0.8, 1.0);
-  vec3 colNebula3 = vec3(0.9, 0.95, 1.0); // Starlight
+  // 5-Act Color Palette evolution
+  // ACT 1: Nebula (Teals, deep blues, soft starlight)
+  vec3 colAct1A = vec3(0.0, 0.4, 0.8);
+  vec3 colAct1B = vec3(0.1, 0.8, 1.0);
+  vec3 colAct1C = vec3(0.9, 0.95, 1.0);
 
-  // ACT 2: Black Hole / Gargantua (Intense cinematic orange, amber, and void/obsidian)
-  vec3 colBH1 = vec3(0.05, 0.0, 0.1);    // Void purple/black
-  vec3 colBH2 = vec3(1.0, 0.3, 0.0);   // Fiery orange
-  vec3 colBH3 = vec3(1.0, 0.7, 0.2);   // Sun gold
+  // ACT 2: Cosmic Web (Emerald, Mint, and Deep Forest)
+  vec3 colAct2A = vec3(0.0, 0.2, 0.1);
+  vec3 colAct2B = vec3(0.0, 0.8, 0.4);
+  vec3 colAct2C = vec3(0.5, 1.0, 0.8);
 
-  // ACT 3: Singularity Evolution (Bioluminescent Indigo, Plum, and soft Cyan)
-  vec3 colSing1 = vec3(0.2, 0.0, 0.5);   // Deep Indigo
-  vec3 colSing2 = vec3(0.6, 0.1, 0.8);   // Plum/Violet
-  vec3 colSing3 = vec3(0.0, 1.0, 0.8);   // Shocking Cyan flare
+  // ACT 3: Pulsar Jet (Electric Blue, Shocking White, and Sapphire)
+  vec3 colAct3A = vec3(0.0, 0.1, 0.6);
+  vec3 colAct3B = vec3(0.2, 0.5, 1.0);
+  vec3 colAct3C = vec3(1.0, 1.0, 1.0);
+
+  // ACT 4: Black Hole / Gargantua (Intense cinematic orange, amber, and void/obsidian)
+  vec3 colAct4A = vec3(0.05, 0.0, 0.1); 
+  vec3 colAct4B = vec3(1.0, 0.3, 0.0);  
+  vec3 colAct4C = vec3(1.0, 0.7, 0.2);  
+
+  // ACT 5: Singularity Evolution (Bioluminescent Indigo, Plum, and soft Cyan)
+  vec3 colAct5A = vec3(0.2, 0.0, 0.5);  
+  vec3 colAct5B = vec3(0.6, 0.1, 0.8);  
+  vec3 colAct5C = vec3(0.0, 1.0, 0.8);  
 
   float h = fract(pos.y * 0.01 + pos.x * 0.01 + uTime * 0.1 + h1);
-
   vec3 col1, col2, col3;
 
-  if (uScroll < 0.3) {
-      col1 = colNebula1; col2 = colNebula2; col3 = colNebula3;
-  } else if (uScroll < 0.7) {
-      float t = smoothstep(0.3, 0.7, uScroll);
-      col1 = mix(colNebula1, colBH1, t);
-      col2 = mix(colNebula2, colBH2, t);
-      col3 = mix(colNebula3, colBH3, t);
+  if (uScroll < 0.2) {
+      col1 = colAct1A; col2 = colAct1B; col3 = colAct1C;
+  } else if (uScroll < 0.4) {
+      float t = smoothstep(0.2, 0.4, uScroll);
+      col1 = mix(colAct1A, colAct2A, t);
+      col2 = mix(colAct1B, colAct2B, t);
+      col3 = mix(colAct1C, colAct2C, t);
+  } else if (uScroll < 0.6) {
+      float t = smoothstep(0.4, 0.6, uScroll);
+      col1 = mix(colAct2A, colAct3A, t);
+      col2 = mix(colAct2B, colAct3B, t);
+      col3 = mix(colAct2C, colAct3C, t);
+  } else if (uScroll < 0.8) {
+      float t = smoothstep(0.6, 0.8, uScroll);
+      col1 = mix(colAct3A, colAct4A, t);
+      col2 = mix(colAct3B, colAct4B, t);
+      col3 = mix(colAct3C, colAct4C, t);
   } else {
-      float t = smoothstep(0.7, 1.0, uScroll);
-      col1 = mix(colBH1, colSing1, t);
-      col2 = mix(colBH2, colSing2, t);
-      // Soften the brightest color (col3) significantly towards the end to prevent blinding glow
-      col3 = mix(colBH3, colSing3, t * 0.7); 
+      float t = smoothstep(0.8, 1.0, uScroll);
+      col1 = mix(colAct4A, colAct5A, t);
+      col2 = mix(colAct4B, colAct5B, t);
+      col3 = mix(colAct4C, colAct5C, t * 0.7); // Soften final act peak brightness
   }
 
   if (h < 0.33) {
