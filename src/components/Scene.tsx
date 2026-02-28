@@ -53,8 +53,8 @@ export function Scene() {
                 zPos = THREE.MathUtils.lerp(45, 20, (p - 0.3) / 0.4);
                 yPos = THREE.MathUtils.lerp(5, 25, (p - 0.3) / 0.4);
             } else {
-                // ACT 3: Divebomb straight into the violent, concentrated Singularity
-                zPos = THREE.MathUtils.lerp(20, 2, (p - 0.7) / 0.3);
+                // ACT 3: Divebomb toward the violent, concentrated Singularity
+                zPos = THREE.MathUtils.lerp(20, 5, (p - 0.7) / 0.3); // Stopt at 5 so we don't blind the camera 
                 yPos = THREE.MathUtils.lerp(25, -5, (p - 0.7) / 0.3);
             }
 
@@ -75,10 +75,14 @@ export function Scene() {
             {/* Performance Optimized Post Processing - CSS handles Grain & Vignette */}
             <EffectComposer disableNormalPass multisampling={0}>
                 <Bloom
-                    luminanceThreshold={0.2}
+                    luminanceThreshold={0.4} // Prevent entire simulation from glowing, only glow the brightest cores
                     luminanceSmoothing={0.9}
-                    intensity={1.5} // Stunning bioluminescence
+                    intensity={1.0} // Ethereal and subtle, not blinding
                     mipmapBlur={true}
+                />
+                <ChromaticAberration
+                    blendFunction={BlendFunction.NORMAL}
+                    offset={new THREE.Vector2(0.0015, 0.0015)} // Micro-subtle premium lens diffraction
                 />
             </EffectComposer>
         </>

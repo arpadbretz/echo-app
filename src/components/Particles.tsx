@@ -153,12 +153,12 @@ vec3 getSingularity(vec2 uv) {
   float theta = hash(uv) * 6.2831853;
   float phi = acos((hash(uv + vec2(1.0)) * 2.0) - 1.0);
   
-  // Super concentrated core with occasional explosive flares
-  float r = 3.0;
+  // Wider, more intricate core to prevent blinding bloom overlap
+  float r = 5.0 + sin(theta * 8.0) * 1.5;
   if(hash(uv + 4.0) > 0.95) {
-      r += hash(uv + 5.0) * 12.0; // Huge solar flares shooting out
+      r += hash(uv + 5.0) * 8.0; // Majestic solar flares
   } else {
-      r += hash(uv + 6.0) * 0.5; // Dense boiling surface
+      r += hash(uv + 6.0) * 2.0; // Boiling plasma surface
   }
 
   return vec3(r * sin(phi) * cos(theta), r * sin(phi) * sin(theta), r * cos(phi));
@@ -274,36 +274,38 @@ void main() {
   gl_Position = projectionMatrix * mvPosition;
   
   // Dynamic color palette that evolves with scroll
-  // Scroll 0-0.3: Monochromatic Silver & Ice Blue
-  // Scroll 0.4-0.6: Deep Violet and Cyan
-  // Scroll 0.7-1.0: Warm Gold, Magenta, and White
-  
-  vec3 colSilver = vec3(0.9, 0.95, 1.0);
-  vec3 colIceBlue = vec3(0.0, 0.7, 1.0);
-  
-  vec3 colViolet = vec3(0.6, 0.0, 1.0);
-  vec3 colCyan = vec3(0.0, 1.0, 0.8);
-  
-  vec3 colGold = vec3(1.0, 0.7, 0.1);
-  vec3 colMagenta = vec3(1.0, 0.0, 0.5);
-  vec3 colWhite = vec3(1.0);
+  // ACT 1: Deep Ethereal Nebula (Teals, deep blues, soft starlight)
+  vec3 colNebula1 = vec3(0.0, 0.4, 0.8);
+  vec3 colNebula2 = vec3(0.1, 0.8, 1.0);
+  vec3 colNebula3 = vec3(0.9, 0.95, 1.0); // Starlight
+
+  // ACT 2: Black Hole / Gargantua (Intense cinematic orange, amber, and void/obsidian)
+  vec3 colBH1 = vec3(0.05, 0.0, 0.1);    // Void purple/black
+  vec3 colBH2 = vec3(1.0, 0.3, 0.0);   // Fiery orange
+  vec3 colBH3 = vec3(1.0, 0.7, 0.2);   // Sun gold
+
+  // ACT 3: Singularity Evolution (Bioluminescent Indigo, Plum, and soft Cyan)
+  vec3 colSing1 = vec3(0.2, 0.0, 0.5);   // Deep Indigo
+  vec3 colSing2 = vec3(0.6, 0.1, 0.8);   // Plum/Violet
+  vec3 colSing3 = vec3(0.0, 1.0, 0.8);   // Shocking Cyan flare
 
   float h = fract(pos.y * 0.01 + pos.x * 0.01 + uTime * 0.1 + h1);
 
   vec3 col1, col2, col3;
 
   if (uScroll < 0.3) {
-      col1 = colSilver; col2 = colIceBlue; col3 = vec3(0.2);
+      col1 = colNebula1; col2 = colNebula2; col3 = colNebula3;
   } else if (uScroll < 0.7) {
-      float t = (uScroll - 0.3) / 0.4;
-      col1 = mix(colSilver, colViolet, t);
-      col2 = mix(colIceBlue, colCyan, t);
-      col3 = mix(vec3(0.2), vec3(0.1, 0.0, 0.3), t);
+      float t = smoothstep(0.3, 0.7, uScroll);
+      col1 = mix(colNebula1, colBH1, t);
+      col2 = mix(colNebula2, colBH2, t);
+      col3 = mix(colNebula3, colBH3, t);
   } else {
-      float t = (uScroll - 0.7) / 0.3;
-      col1 = mix(colViolet, colGold, t);
-      col2 = mix(colCyan, colMagenta, t);
-      col3 = mix(vec3(0.1, 0.0, 0.3), colWhite, t * 0.5);
+      float t = smoothstep(0.7, 1.0, uScroll);
+      col1 = mix(colBH1, colSing1, t);
+      col2 = mix(colBH2, colSing2, t);
+      // Soften the brightest color (col3) significantly towards the end to prevent blinding glow
+      col3 = mix(colBH3, colSing3, t * 0.7); 
   }
 
   if (h < 0.33) {
