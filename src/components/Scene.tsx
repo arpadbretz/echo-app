@@ -40,26 +40,28 @@ export function Scene() {
 
             const p = scrollTracker.current.progress;
 
-            // Extreme cinematic push in and pull out
+            // Extreme cinematic spatial camera flightpath
             let zPos = 12;
             let yPos = 0;
 
             if (p < 0.3) {
-                // Fly backwards OUT of the massive deep space nebula
-                zPos = THREE.MathUtils.lerp(1, 35, p / 0.3);
+                // ACT 1: Fly backwards OUT of the massive deep space nebula
+                zPos = THREE.MathUtils.lerp(1, 45, p / 0.3);
                 yPos = THREE.MathUtils.lerp(0, 5, p / 0.3);
             } else if (p < 0.7) {
-                // Drift horizontally past floating ribbons
-                zPos = THREE.MathUtils.lerp(35, 25, (p - 0.3) / 0.4);
-                yPos = THREE.MathUtils.lerp(5, 3, (p - 0.3) / 0.4);
+                // ACT 2: Rise up and view the immense Black Hole / Accretion Disk from above
+                zPos = THREE.MathUtils.lerp(45, 20, (p - 0.3) / 0.4);
+                yPos = THREE.MathUtils.lerp(5, 25, (p - 0.3) / 0.4);
             } else {
-                // Aggressively push forward into the final DNA Helix
-                zPos = THREE.MathUtils.lerp(25, 14, (p - 0.7) / 0.3);
-                yPos = THREE.MathUtils.lerp(3, -5, (p - 0.7) / 0.3);
+                // ACT 3: Divebomb straight into the violent, concentrated Singularity
+                zPos = THREE.MathUtils.lerp(20, 2, (p - 0.7) / 0.3);
+                yPos = THREE.MathUtils.lerp(25, -5, (p - 0.7) / 0.3);
             }
 
             state.camera.position.z = zPos;
             state.camera.position.y = yPos;
+
+            // Constantly stare at the absolute center of the universe
             state.camera.lookAt(0, 0, 0);
         }
     });

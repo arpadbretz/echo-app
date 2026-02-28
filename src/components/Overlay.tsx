@@ -151,7 +151,7 @@ export function Overlay() {
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(anchorLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter I. The Anchor</p>
                         </div>
-                        <h1 className="font-serif text-[clamp(2.5rem,7vw,12rem)] leading-[0.8] text-center font-light tracking-tighter text-white text-glow">
+                        <h1 className="font-serif text-[clamp(2.5rem,7vw,12rem)] leading-[0.8] text-center font-light tracking-tighter text-glow text-ethereal">
                             <div className="overflow-hidden p-2">
                                 <span ref={captureLine(anchorLines, 1)} className="inline-block translate-y-[120%] opacity-0">What has passed</span>
                             </div>
@@ -168,7 +168,7 @@ export function Overlay() {
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(voidLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter II. The Void</p>
                         </div>
-                        <h2 className="font-serif text-[clamp(2rem,6vw,9rem)] italic font-light text-white text-glow leading-[0.9]">
+                        <h2 className="font-serif text-[clamp(2rem,6vw,9rem)] italic font-light text-glow text-ethereal leading-[0.9]">
                             <div className="overflow-hidden p-2">
                                 <span ref={captureLine(voidLines, 1)} className="inline-block opacity-0 translate-y-[120%]">Time only</span>
                             </div>
@@ -185,7 +185,7 @@ export function Overlay() {
                         <div className="overflow-hidden mb-4">
                             <p ref={captureLine(interactionLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 inline-block">Awakening</p>
                         </div>
-                        <p className="font-serif text-[clamp(1.2rem,3vw,3.5rem)] italic text-white/90 font-light text-glow">
+                        <p className="font-serif text-[clamp(1.2rem,3vw,3.5rem)] italic opacity-90 font-light text-glow text-ethereal">
                             <span ref={captureLine(interactionLines, 1)} className="inline-block opacity-0">Reach out.</span><br />
                             <span ref={captureLine(interactionLines, 2)} className="inline-block opacity-0">Scatter the dust.</span>
                         </p>
@@ -198,7 +198,7 @@ export function Overlay() {
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(rebirthLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 translate-y-full inline-block">Chapter III. The Evolution</p>
                         </div>
-                        <h1 className="font-serif text-[clamp(3.5rem,10vw,16rem)] font-light tracking-widest text-white text-glow">
+                        <h1 className="font-serif text-[clamp(3.5rem,10vw,16rem)] font-light tracking-widest text-glow text-ethereal">
                             <div className="overflow-hidden p-4">
                                 <span ref={captureLine(rebirthLines, 1)} className="inline-block opacity-0 translate-y-full">A new <span className="italic">echo</span>.</span>
                             </div>

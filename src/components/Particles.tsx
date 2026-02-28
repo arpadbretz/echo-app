@@ -125,47 +125,43 @@ vec3 getNebula(vec2 uv) {
   return vec3(x, y, z);
 }
 
-vec3 getTorusKnot(vec2 uv) {
-  float t = hash(uv) * 6.2831853 * 2.0; // Two loops
-  float p = 3.0;
-  float q = 4.0;
-  float r = cos(q * t) + 3.0;
-  float x = r * cos(p * t);
-  float y = r * sin(p * t);
-  float z = -sin(q * t);
-
-  // Thicken lines into ribbons
-  vec3 pos = vec3(x, y, z) * 1.5;
-  vec3 noiseOff = vec3(
-    (hash(uv + 3.0) - 0.5) * 1.0,
-    (hash(uv + 4.0) - 0.5) * 1.0,
-    (hash(uv + 5.0) - 0.5) * 1.0
-  );
-  return pos + noiseOff;
-}
-
-vec3 getHelix(vec2 uv) {
-  float id = hash(uv);
-  float t = id * 50.0 - 25.0; // Taller double helix
-  float angle = t * 1.5; 
-  float radius = 5.0 + sin(t * 0.3) * 1.5; 
+vec3 getBlackHole(vec2 uv) {
+  // A monumental event horizon / accretion disk
+  float t = hash(uv) * 6.2831853; // Angle
+  float rBase = 12.0 + (hash(uv + 1.0) * 15.0); // Wide flat disk
   
-  float strand = step(0.5, hash(uv + vec2(3.0))); 
-  float offset = strand * 3.14159;
-  
-  float x = radius * cos(angle + offset);
-  float z = radius * sin(angle + offset);
-  
-  float nx = (hash(uv + vec2(4.0)) - 0.5) * 1.5;
-  float ny = (hash(uv + vec2(5.0)) - 0.5) * 1.5;
-  float nz = (hash(uv + vec2(6.0)) - 0.5) * 1.5;
-
-  if (hash(uv + vec2(7.0)) > 0.97) {
-      x = x * 0.1; 
-      z = z * 0.1;
+  // Create the deep void in the center
+  float eventHorizon = 5.0;
+  if (rBase < eventHorizon) {
+      rBase += eventHorizon; // push matter out of the black hole center
   }
 
-  return vec3(x + nx, t + ny, z + nz);
+  // Squashed Y axis to make it a disk
+  float yNoise = (hash(uv + 2.0) - 0.5) * 2.0; 
+  // Funnel effect near the event horizon
+  float funnel = smoothstep(eventHorizon + 4.0, eventHorizon, rBase) * 8.0;
+
+  float x = rBase * cos(t);
+  float z = rBase * sin(t);
+  float y = yNoise - funnel;
+
+  return vec3(x, y, z);
+}
+
+vec3 getSingularity(vec2 uv) {
+  // A terrifyingly dense, high-energy spherical core
+  float theta = hash(uv) * 6.2831853;
+  float phi = acos((hash(uv + vec2(1.0)) * 2.0) - 1.0);
+  
+  // Super concentrated core with occasional explosive flares
+  float r = 3.0;
+  if(hash(uv + 4.0) > 0.95) {
+      r += hash(uv + 5.0) * 12.0; // Huge solar flares shooting out
+  } else {
+      r += hash(uv + 6.0) * 0.5; // Dense boiling surface
+  }
+
+  return vec3(r * sin(phi) * cos(theta), r * sin(phi) * sin(theta), r * cos(phi));
 }
 
 void main() {
@@ -175,8 +171,8 @@ void main() {
   float scroll = clamp(uScroll, 0.0, 1.0);
   
   vec3 shape1 = getNebula(vUv);
-  vec3 shape2 = getTorusKnot(vUv);
-  vec3 shape3 = getHelix(vUv);
+  vec3 shape2 = getBlackHole(vUv);
+  vec3 shape3 = getSingularity(vUv);
   
   vec3 fluidVel = curlNoise(currentPos * 0.2 + uTime * 0.15) * 4.5;
   
@@ -217,20 +213,22 @@ void main() {
       fluidAmount = 0.02; // Snap tight into DNA
   }
 
-  // Mouse interact: Swirl & Attract/Repel
+  // Cinematic Mouse Interaction: Elegant Gravity Lensing Wake
   vec3 dir = currentPos - uMouse;
   float dist = length(dir);
   vec3 mouseForce = vec3(0.0);
   
-  if (dist < 5.0 && scroll > 0.05 && scroll < 0.95) {
-      float force = (5.0 - dist) / 5.0;
-      // Tangent for vortex swirl
-      vec3 tangent = normalize(cross(dir, vec3(0.0, 1.0, 0.2)));
+  // Massive interaction radius, but very gentle, liquid push
+  if (dist < 12.0 && scroll > 0.05 && scroll < 0.95) {
+      // Smooth falloff curve
+      float force = pow((12.0 - dist) / 12.0, 2.0); 
       
-      // Pull in then violently spin out
-      float spin = mix(0.5, 4.0, force);
-      mouseForce += tangent * spin * force;
-      mouseForce += normalize(dir) * force * 0.8;
+      // Gently push away from the cursor as if running your hand through water
+      mouseForce += normalize(dir) * force * 1.5;
+      
+      // A very subtle, slow trailing swirl to leave a beautiful wake
+      vec3 tangent = normalize(cross(dir, vec3(0.0, 1.0, 0.5)));
+      mouseForce += tangent * force * 0.5;
   }
 
   // Velocity Calculation

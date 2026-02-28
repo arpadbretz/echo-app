@@ -54,6 +54,15 @@ Removed .text-gradient because combining -webkit-text-fill-color: transparent
 with text-shadow causes the text to become a blurry smudge. 
 */
 
+/* Safe Awwwards-style ethereal chrome text */
+.text-ethereal {
+  color: #fbffff;
+  letter-spacing: -0.02em;
+  opacity: 0.95;
+  text-shadow: 0px 4px 60px rgba(255, 255, 255, 0.7),
+    0px 0px 80px rgba(138, 43, 226, 0.4);
+}
+
 /* Deep Endless Space gradient for depth */
 .ambient-bg {
   position: fixed;
