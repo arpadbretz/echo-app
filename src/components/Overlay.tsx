@@ -125,34 +125,6 @@ export function Overlay() {
             }
         );
 
-        // Force Stop (Pinning) at Acts
-        // This stops the text in the center of the screen, forcing the user to scroll through the background 3D scene 
-        // while the narrative holds perfectly still.
-        ScrollTrigger.create({
-            trigger: ".content-anchor",
-            start: "center center",
-            end: "+=150%", // Hold for 1.5 screen lengths
-            pin: true,
-        });
-        ScrollTrigger.create({
-            trigger: ".content-distortion",
-            start: "center center",
-            end: "+=200%", // Hold for 2 screen lengths
-            pin: true,
-        });
-        ScrollTrigger.create({
-            trigger: ".content-interaction",
-            start: "center center",
-            end: "+=150%",
-            pin: true,
-        });
-        ScrollTrigger.create({
-            trigger: ".content-rebirth",
-            start: "center center",
-            end: "+=100%",
-            pin: true,
-        });
-
         return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     }, []);
 
@@ -174,8 +146,8 @@ export function Overlay() {
 
             <div ref={containerRef} className="relative z-10 w-full pointer-events-none overflow-hidden">
                 {/* Intro */}
-                <section className="h-[250vh] w-full flex items-center justify-center section-anchor">
-                    <div className="flex flex-col items-center content-anchor">
+                <section className="h-[250vh] w-full relative section-anchor">
+                    <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center">
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(anchorLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter I. The Anchor</p>
                         </div>
@@ -191,8 +163,8 @@ export function Overlay() {
                 </section>
 
                 {/* Distortion */}
-                <section className="h-[300vh] w-full flex items-center justify-start px-[8vw] section-distortion">
-                    <div className="content-distortion">
+                <section className="h-[300vh] w-full relative section-distortion">
+                    <div className="sticky top-0 h-screen w-full flex flex-col items-start justify-center px-[8vw]">
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(voidLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 translate-y-full opacity-0 inline-block">Chapter II. The Void</p>
                         </div>
@@ -208,8 +180,8 @@ export function Overlay() {
                 </section>
 
                 {/* Interaction */}
-                <section className="h-[300vh] w-full flex items-center justify-end px-[8vw] section-interaction">
-                    <div className="text-right content-interaction">
+                <section className="h-[300vh] w-full relative section-interaction">
+                    <div className="sticky top-0 h-screen w-full flex flex-col items-end justify-center px-[8vw] text-right">
                         <div className="overflow-hidden mb-4">
                             <p ref={captureLine(interactionLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 inline-block">Awakening</p>
                         </div>
@@ -221,8 +193,8 @@ export function Overlay() {
                 </section>
 
                 {/* Rebirth */}
-                <section className="h-[150vh] w-full flex flex-col items-center justify-center section-rebirth">
-                    <div className="flex flex-col items-center content-rebirth">
+                <section className="h-[150vh] w-full relative section-rebirth">
+                    <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center">
                         <div className="overflow-hidden mb-8">
                             <p ref={captureLine(rebirthLines, 0)} className="font-sans uppercase tracking-[0.6em] text-[10px] md:text-xs text-white/40 opacity-0 translate-y-full inline-block">Chapter III. The Evolution</p>
                         </div>
