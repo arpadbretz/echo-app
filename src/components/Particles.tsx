@@ -292,22 +292,29 @@ void main() {
       fluidAmount = 0.05; 
   }
 
-  // Cinematic Mouse Interaction: Elegant Gravity Lensing Wake
+  // Cinematic Mouse Interaction: Massive Gravity Spatial Distortion
   vec3 dir = currentPos - uMouse;
   float dist = length(dir);
   vec3 mouseForce = vec3(0.0);
   
-  // Massive interaction radius, but very gentle, liquid push
-  if (dist < 12.0 && scroll > 0.05 && scroll < 0.95) {
-      // Smooth falloff curve
-      float force = pow((12.0 - dist) / 12.0, 2.0); 
+  // Enormous gravity well effect (15 unit radius)
+  if (dist < 15.0 && scroll > 0.02 && scroll < 0.98) {
+      // 1. Extreme Pull: Yank particles intensely toward the cursor in X/Y
+      // 2. Tear Depth: Push the pulled particles extremely far forward in Z to create a 3D bubble/dome
       
-      // Gently push away from the cursor as if running your hand through water
-      mouseForce += normalize(dir) * force * 1.5;
+      float force = pow((15.0 - dist) / 15.0, 2.5); // Sharp, intense exponential curve
       
-      // A very subtle, slow trailing swirl to leave a beautiful wake
-      vec3 tangent = normalize(cross(dir, vec3(0.0, 1.0, 0.5)));
-      mouseForce += tangent * force * 0.5;
+      // Pull XY in towards cursor center
+      vec2 pullXY = -normalize(dir.xy) * force * 2.5;
+      
+      // Push Z out violently towards the camera to create a 3D distortion dome
+      float pushZ = force * 6.0;
+      
+      // Fast, chaotic swirl around the edge of the crater
+      vec3 tangent = normalize(cross(dir, vec3(0.0, 0.0, 1.0)));
+      
+      mouseForce += vec3(pullXY, pushZ);
+      mouseForce += tangent * force * 3.0; // Fast vortex spin
   }
 
   // Velocity Calculation
